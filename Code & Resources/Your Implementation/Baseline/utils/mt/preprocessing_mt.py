@@ -34,7 +34,22 @@ def get_data_path_mt(subject, task, sensor_id, stage ):
             constant_common.MT_PATH + \
             'subject_00' + str(subject) + '/' + 'evaluation/exported/' \
             'eval_' + task + '_001-000_' + sensor_id + constant_common.MT_EXTENSION
-
+    elif stage == 'calibration':
+        if 'static' in task:
+            mt_fn = constant_common.IN_LAB_PATH + \
+                constant_common.MT_PATH + \
+                'subject_00' + str(subject) + '/' + 'calibration/static/exported/' \
+                + task + '_001-000_' + sensor_id + constant_common.MT_EXTENSION
+        elif 'walking' in task:
+            mt_fn = constant_common.IN_LAB_PATH + \
+                constant_common.MT_PATH + \
+                'subject_00' + str(subject) + '/' + 'calibration/functional/exported/' \
+                + task + '_001-000_' + sensor_id + constant_common.MT_EXTENSION
+        else:
+            mt_fn = constant_common.IN_LAB_PATH + \
+                constant_common.MT_PATH + \
+                'subject_00' + str(subject) + '/' + 'calibration/non_guided/exported/' \
+                + task + '_001-000_' + sensor_id + constant_common.MT_EXTENSION
     return mt_fn
 
 

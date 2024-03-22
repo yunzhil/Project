@@ -157,3 +157,78 @@ def sensor_to_segment_mt(data_static, data_walking, walking_period, data_squat, 
     return seg2sens
 
 
+# Calibration
+def sensor_to_segment_mt_cali1(data_static, data_walking, walking_period, data_toe_touching):
+    ''' Obtain transformation from segment-to-sensor
+
+    Args:
+        + data_static (dict of pd.DataFrame): static data for the vertical axis
+        + data_walking (dict of pd.DataFrame): walking data for thigh/shank/foot rotational axis
+        + data_squat (dict of pd.DataFrame): squat data for pelvis rotational axis
+        + dir (str): direction of attachment, e.g., mid, high, low, or front
+
+    Returns:
+        + seg2sens (dict of pd.DataFrame): segment-to-sensor transformation
+    '''
+    seg2sens = {}
+
+    for sensor_name in tqdm(data_static.keys()):
+        static_acc = 1*data_static[sensor_name][['Acc_X', 'Acc_Y', 'Acc_Z']].to_numpy()
+        vy         = np.mean(static_acc, axis = 0)
+        fy         = vy/norm(vy)
+
+        side = sensor_name[-1]
+        if sensor_name == 'chest':
+            fx = np.ones(3) 
+            fy = np.ones(3) 
+            fz = np.ones(3) # ignore as we do not use 
+            
+        elif sensor_name == 'pelvis':
+            static_toe_touching_acc = 1*data_toe_touching[sensor_name][['Acc_X', 'Acc_Y', 'Acc_Z']].to_numpy()
+            vx = np.mean(static_toe_touching_acc, axis = 0)
+            fx = vx/norm(vx)
+
+            vz = np.cross(fx, fy)
+            fz = vz/norm(vz)
+
+            vx = np.cross(fy, fz)
+            fx = vx/norm(vx)
+
+        elif (sensor_name == 'foot_r') or (sensor_name == 'foot_l'):
+            walking_gyr = 1*data_walking[sensor_name][['Gyr_X', 'Gyr_Y', 'Gyr_Z']].to_numpy()
+            walking_gyr = walking_gyr[walking_period[0]:walking_period[1], :]
+            pc1_ax      = get_pc1_ax_mt(walking_gyr)
+
+            if pc1_ax[1] < 0:
+                pc1_ax = (-1)*pc1_ax
+            
+            vx = np.cross(fy, pc1_ax)
+            fx = vx/norm(vx)
+
+            vz = np.cross(fx, fy)
+            fz = vz/norm(vz)
+        
+        else:
+            walking_gyr = 1*data_walking[sensor_name][['Gyr_X', 'Gyr_Y', 'Gyr_Z']].to_numpy()
+            walking_gyr = walking_gyr[walking_period[0]:walking_period[1], :]
+            pc1_ax      = get_pc1_ax_mt(walking_gyr)
+
+
+            if pc1_ax[-1] < 0:
+                pc1_ax = (-1)*pc1_ax
+            
+            if side == 'r':
+                vx = np.cross(fy, pc1_ax)
+            else:
+                vx = np.cross(pc1_ax, fy)
+            
+            fx = vx/norm(vx)
+
+            vz = np.cross(fx, fy)
+            fz = vz/norm(vz)
+        
+        seg2sens[sensor_name] = np.array([fx, fy, fz])
+
+    return seg2sens
+
+

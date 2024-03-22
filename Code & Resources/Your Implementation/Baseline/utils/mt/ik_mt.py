@@ -156,13 +156,13 @@ def get_all_ja_mt(seg2sens, orientation_mt):
     temp_ankle_l = get_ja(orientation_mt['shank_l'], orientation_mt['foot_l'], seg2sens['shank_l'], seg2sens['foot_l'], c_flag = True)
 
     mt_ja['hip_adduction_l'] = constant_common.JA_SIGN['hip_adduction_l']*temp_hip_l[:, 0]
-    mt_ja['hip_rotation_l']  = -1*constant_common.JA_SIGN['hip_rotation_l']*temp_hip_l[:, 1]
+    mt_ja['hip_rotation_l']  = constant_common.JA_SIGN['hip_rotation_l']*temp_hip_l[:, 1]
     mt_ja['hip_flexion_l']   = constant_common.JA_SIGN['hip_flexion_l']*temp_hip_l[:, 2]
-    mt_ja['knee_adduction_l'] = constant_common.JA_SIGN['knee_adduction_l']*temp_knee_l[:, 0]
+    mt_ja['knee_adduction_l'] = -1*constant_common.JA_SIGN['knee_adduction_l']*temp_knee_l[:, 0]
     mt_ja['knee_rotation_l']  = -1*constant_common.JA_SIGN['knee_rotation_l']*temp_knee_l[:, 1]
     mt_ja['knee_flexion_l']  = constant_common.JA_SIGN['knee_flexion_l']*temp_knee_l[:, 2]
     mt_ja['ankle_adduction_l']    = constant_common.JA_SIGN['ankle_angle_l']*temp_ankle_l[:, 0]
-    mt_ja['ankle_rotation_l']    = constant_common.JA_SIGN['ankle_angle_l']*temp_ankle_l[:, 1]
+    mt_ja['ankle_rotation_l']    = -1*constant_common.JA_SIGN['ankle_angle_l']*temp_ankle_l[:, 1]
     mt_ja['ankle_flexion_l']    = constant_common.JA_SIGN['ankle_angle_l']*temp_ankle_l[:, 2]
 
     temp_hip_r   = get_ja(orientation_mt['pelvis'], orientation_mt['thigh_r'], seg2sens['pelvis'], seg2sens['thigh_r'], c_flag = True)
@@ -170,13 +170,13 @@ def get_all_ja_mt(seg2sens, orientation_mt):
     temp_ankle_r = get_ja(orientation_mt['shank_r'], orientation_mt['foot_r'], seg2sens['shank_r'], seg2sens['foot_r'], c_flag = True)
 
     mt_ja['hip_adduction_r'] = constant_common.JA_SIGN['hip_adduction_r']*temp_hip_r[:, 0]
-    mt_ja['hip_rotation_r']  = -1*constant_common.JA_SIGN['hip_rotation_r']*temp_hip_r[:, 1]
+    mt_ja['hip_rotation_r']  = constant_common.JA_SIGN['hip_rotation_r']*temp_hip_r[:, 1]
     mt_ja['hip_flexion_r']   = constant_common.JA_SIGN['hip_flexion_r']*temp_hip_r[:, 2]
-    mt_ja['knee_adduction_r'] = constant_common.JA_SIGN['knee_adduction_r']*temp_knee_r[:, 0]
+    mt_ja['knee_adduction_r'] = -1*constant_common.JA_SIGN['knee_adduction_r']*temp_knee_r[:, 0]
     mt_ja['knee_rotation_r']  = -1*constant_common.JA_SIGN['knee_rotation_r']*temp_knee_r[:, 1]
     mt_ja['knee_flexion_r']  = constant_common.JA_SIGN['knee_flexion_r']*temp_knee_r[:, 2]
     mt_ja['ankle_adduction_r']    = constant_common.JA_SIGN['ankle_angle_r']*temp_ankle_r[:, 0]
-    mt_ja['ankle_rotation_r']    = constant_common.JA_SIGN['ankle_angle_r']*temp_ankle_r[:, 1]
+    mt_ja['ankle_rotation_r']    = -1*constant_common.JA_SIGN['ankle_angle_r']*temp_ankle_r[:, 1]
     mt_ja['ankle_flexion_r']    = constant_common.JA_SIGN['ankle_angle_r']*temp_ankle_r[:, 2]
 
     return mt_ja
