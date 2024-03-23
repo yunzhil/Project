@@ -2,6 +2,9 @@ import math
 import pandas as pd
 import matplotlib.pyplot as plt
 import ipdb
+from scipy.signal import find_peaks
+from scipy.signal import find_peaks_cwt
+import numpy as np
  
 def euler_from_quaternion(x, y, z, w):
         """
@@ -46,18 +49,4 @@ elif IMU_f == 'accel':
 
 IMU_df = pd.DataFrame(full_data)
 IMU_df.plot()
-plt.show()
-
-raw_mocap = pd.read_csv(r'C:\Users\kiddb\Downloads\eval_hip_adduction_001.csv', sep='\s')
-mocap_data = raw_mocap[5:].reset_index(drop=True)
-mocap_data.columns = pd.RangeIndex(mocap_data.columns.size)
-mocap_dt = mocap_data[0]
-mocap_full = []
-for row in mocap_dt:
-       mocap_full.append(row.split(','))
-mocap_df = pd.DataFrame(mocap_full)
-mocap_df.drop(columns=[0], inplace=True)
-marker1 = pd.DataFrame({0:mocap_df[2], 1:mocap_df[3], 2:mocap_df[4]})
-marker1 = marker1.astype(float)
-marker1.plot()
 plt.show()
