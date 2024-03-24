@@ -33,15 +33,17 @@ def segment(file, col_no, segment_area=(1000, 9000), min_height_low=-1, min_heig
     #fp = findpeaks()
     #results = fp.fit(marker1[2])
     #fp.plot()
-    minima, _ = find_peaks(-1*marker1[col_no], height = [abs(min_height_low), abs(min_height_high)], distance = constant_mocap.MOCAP_SAMPLING_RATE * 0.5)
+    # height = [min_height_low, min_height_high], 
+    # height = [max_height_low, max_height_high], 
+    minima, _ = find_peaks(-1*marker1[col_no], distance = constant_mocap.MOCAP_SAMPLING_RATE * 0.5)
     #min = marker1[col_no][minima].nsmallest(5).index
     #maxima = find_peaks_cwt(np.array(list(marker1[col_no])), 50)
-    maxima, _ = find_peaks(marker1[col_no], height = [max_height_low, max_height_high], distance = constant_mocap.MOCAP_SAMPLING_RATE * 0.5)
+    maxima, _ = find_peaks(marker1[col_no], distance = constant_mocap.MOCAP_SAMPLING_RATE * 0.5)
     #x = np.linspace(0, len(marker1[2]), len(marker1[2]))
     save_file = r'C:\Users\kiddb\Documents\GitHub\WHT-Project\data\segments' + '\\' + str(col_no) + file[-18:]
     plt.plot(x, marker1[col_no])
     plt.plot(x[minima], marker1[col_no][minima], 'x', label='mins')
-    plt.plot(x[maxima], marker1[col_no][maxima], 'o', label='max')
+    ##plt.plot(x[maxima], marker1[col_no][maxima], 'o', label='max')
     plt.legend()
     plt.savefig(save_file[:-4])
     plt.show(block = False)
