@@ -10,7 +10,7 @@ import numpy as np
 import ipdb
 from util.mocap import preprocessing_mocap, constant_mocap
 
-def segment(file, col_no, segment_area=[1000, 9000], min_height_low=-1, min_height_high=1, max_height_low=-1, max_height_high=1):
+def segment(file, col_no, segment_area=(1000, 9000), min_height_low=-1, min_height_high=1, max_height_low=-1, max_height_high=1):
     raw_mocap = pd.read_csv(file, sep='\s')
     mocap_data = raw_mocap[5:].reset_index(drop=True)
     mocap_data.columns = pd.RangeIndex(mocap_data.columns.size)
@@ -38,7 +38,7 @@ def segment(file, col_no, segment_area=[1000, 9000], min_height_low=-1, min_heig
     #maxima = find_peaks_cwt(np.array(list(marker1[col_no])), 50)
     maxima, _ = find_peaks(marker1[col_no], height = [max_height_low, max_height_high], distance = constant_mocap.MOCAP_SAMPLING_RATE * 0.5)
     #x = np.linspace(0, len(marker1[2]), len(marker1[2]))
-    save_file = r'C:\Users\kiddb\Documents\GitHub\WHT-Project\data\segments' + '\\' + file[-18:]
+    save_file = r'C:\Users\kiddb\Documents\GitHub\WHT-Project\data\segments' + '\\' + str(col_no) + file[-18:]
     plt.plot(x, marker1[col_no])
     plt.plot(x[minima], marker1[col_no][minima], 'x', label='mins')
     plt.plot(x[maxima], marker1[col_no][maxima], 'o', label='max')
