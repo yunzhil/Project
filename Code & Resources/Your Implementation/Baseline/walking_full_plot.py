@@ -351,6 +351,31 @@ for selected_task in task_list:
 
 
 
+    # # --- Save the results --- #
+    mocap_ja_storage = []
+    cali_1_ja_storage = []
+    without_cali_ja_storage = []
+    cali_2_ja_storage = []
+    for jk in main_ja_mocap.keys():
+        mocap_ja_storage.append(main_ja_mocap[jk])
+        cali_1_ja_storage.append(main_ja_mt[jk])
+        without_cali_ja_storage.append(without_cali_ja_mt[jk])
+        cali_2_ja_storage.append(cali_2_ja_mt[jk])
+    mocap_ja_storage = np.array(mocap_ja_storage)
+    cali_1_ja_storage = np.array(cali_1_ja_storage)
+    without_cali_ja_storage = np.array(without_cali_ja_storage)
+    cali_2_ja_storage = np.array(cali_2_ja_storage)
+    mocap_ja_storage = pd.DataFrame(mocap_ja_storage)
+    cali_1_ja_storage = pd.DataFrame(cali_1_ja_storage)
+    without_cali_ja_storage = pd.DataFrame(without_cali_ja_storage)
+    cali_2_ja_storage = pd.DataFrame(cali_2_ja_storage)
+    mocap_ja_storage.to_csv('Milestone_4/s' + str(subject) + '_' + selected_task + '_mocap_results.csv')
+    cali_1_ja_storage.to_csv('Milestone_4/s' + str(subject) + '_' + selected_task + '_cali_1_results.csv')
+    without_cali_ja_storage.to_csv('Milestone_4/s' + str(subject) + '_' + selected_task + '_without_cali_results.csv')
+    cali_2_ja_storage.to_csv('Milestone_4/s' + str(subject) + '_' + selected_task + '_cali_2_results.csv')
+
+
+
     # #save the main_ja_mocap as csv file
     # mocap_ja_storage = []
     # for jk in main_ja_mocap.keys():
