@@ -21,9 +21,11 @@ def J(sr, sp, cr, cp):
 def f(sr, sp, cr, cp, a):
     return np.array([-sp-a.iloc[0]/np.linalg.norm(a)], [sr*cp-a.iloc[1]/np.linalg.norm(a)], [cr*cp-a.iloc[2]/np.linalg.norm(a)])
 
-#  Import data
+# User Variables
 directory = r'C:\Users\kiddb\Downloads'
-file = 'eval_overground_walking_001-000_00B4D6D1.txt'
+file = 'eval_overground_walking_001-000_00B4D7FF.txt'
+
+#  Import data
 IMUdata = preprocessing_mt.load_data_mt(directory + '\\' + file)
 IMUdata.rename(columns={'Acc_X':'AccelX', 'Acc_Y':'AccelY', 'Acc_Z':'AccelZ', 'Gyr_X': 'GyroX', 'Gyr_Y': 'GyroY', 'Gyr_Z': 'GyroZ'}, inplace=True)
 #ipdb.set_trace()
@@ -40,7 +42,7 @@ wx, wy, wz = w['GyroX'], w['GyroY'], w['GyroZ']
 # stance phase identification (zero velocity detection)
 # Roll/Pitch Integration (omega)
 # Detect foot stationary phase, heel-strike, toe off
-unique_fpa = set()
+fpa_array = np.array([])
 gait = gaitphase.GaitPhase(datarate=60)
 fpa = FPA_algorithm.FPA(is_right_foot=True, datarate=60)
 for ind, i in enumerate(w.iterrows()):
@@ -48,12 +50,12 @@ for ind, i in enumerate(w.iterrows()):
     gait.update_gaitphase(i)
     #ipdb.set_trace()
     fpa.update_FPA(IMUdata.iloc[ind], gait.gaitphase_old, gait.gaitphase)
-    unique_fpa.add(fpa.FPA_this_step)
-    print(fpa.FPA_this_step, fpa.FPA_last_step)
+    fpa_array = np.append(fpa_array, fpa.FPA_this_step)
+    #print(fpa.FPA_this_step, fpa.FPA_last_step)
 
-ordered_unique_fpa = list(unique_fpa)
-ordered_unique_fpa.sort()
-print(ordered_unique_fpa)
+ordered_unique_fpa, index = np.unique(fpa_array, return_index=True)
+unique_fpa = fpa_array[np.sort(index)]
+print(unique_fpa)
 #self.my_FPA.update_FPA(data[SENSOR_FOOT], self.my_GP.gaitphase_old, self.my_GP.gaitphase)
 # for i = 1:N
 #   if i in the middle of nth step stance phase, initialize racc,pacc of i from accel
