@@ -32,8 +32,8 @@ task_list = ['hip_adduction']
 
 # Sensor configuration for analysis
 sensor_config  = {'pelvis': 'PELV', 
-                'foot_r': 'FOOT_R', 'shank_r': 'LLEG_R', 'thigh_r': 'ULEG_R',
-                'foot_l': 'FOOT_L', 'shank_l': 'LLEG_L', 'thigh_l': 'ULEG_L',
+                'foot_r': 'FOOT_L', 'shank_r': 'LLEG_R', 'thigh_r': 'ULEG_R',
+                'foot_l': 'FOOT_R', 'shank_l': 'LLEG_L', 'thigh_l': 'ULEG_L',
                 'shank_r_mis': 'FARM_R', 'thigh_r_mis': 'UARM_R', 'foot_r_mis': 'HAND_R',}
 
 subject  = 2
@@ -41,19 +41,39 @@ subject  = 2
 # Calibration Step
 
 # Data for calibration
+# task_static = 'static_pose'
+# data_static_mt = preprocessing_mt.get_all_data_mt(subject, task_static, sensor_config, stage = 'calibration')
+# data_static_mt_ = preprocessing_mt.match_data_mt(data_static_mt) # data after matching
+# task_walking = 'treadmill_walking' # to calibrate thighs, shanks, and feet
+# data_walking_mt = preprocessing_mt.get_all_data_mt(subject, task_walking, sensor_config, stage = 'calibration')
+# task_toe_touching = 'static_toe_touch'
+# data_toe_touching_mt = preprocessing_mt.get_all_data_mt(subject, task_toe_touching, sensor_config, stage = 'calibration')
+# task_static_sitting = 'static_sitting'
+# data_static_sitting_mt = preprocessing_mt.get_all_data_mt(subject, task_static_sitting, sensor_config, stage = 'calibration')
+
+# walking_period = calibration_mt.get_walking_4_calib(data_walking_mt['shank_r']['Gyr_Z'].to_numpy())
+# seg2sens = calibration_mt.sensor_to_segment_mt_cali1(data_static_mt, data_walking_mt, walking_period, data_toe_touching_mt)
+# seg2sens_2 = calibration_mt.sensor_to_segment_mt_cali3(data_static_mt, data_toe_touching_mt, data_static_sitting_mt)
+
+# Data for calibration
 task_static = 'static_pose'
 data_static_mt = preprocessing_mt.get_all_data_mt(subject, task_static, sensor_config, stage = 'calibration')
 data_static_mt_ = preprocessing_mt.match_data_mt(data_static_mt) # data after matching
 task_walking = 'treadmill_walking' # to calibrate thighs, shanks, and feet
 data_walking_mt = preprocessing_mt.get_all_data_mt(subject, task_walking, sensor_config, stage = 'calibration')
+data_walking_mt_ = preprocessing_mt.match_data_mt(data_walking_mt) # data after matching
 task_toe_touching = 'static_toe_touch'
 data_toe_touching_mt = preprocessing_mt.get_all_data_mt(subject, task_toe_touching, sensor_config, stage = 'calibration')
+data_toe_touching_mt_ = preprocessing_mt.match_data_mt(data_toe_touching_mt) # data after matching
 task_static_sitting = 'static_sitting'
 data_static_sitting_mt = preprocessing_mt.get_all_data_mt(subject, task_static_sitting, sensor_config, stage = 'calibration')
+data_static_sitting_mt_ = preprocessing_mt.match_data_mt(data_static_sitting_mt) # data after matching
 
-walking_period = calibration_mt.get_walking_4_calib(data_walking_mt['shank_r']['Gyr_Z'].to_numpy())
-seg2sens = calibration_mt.sensor_to_segment_mt_cali1(data_static_mt, data_walking_mt, walking_period, data_toe_touching_mt)
-seg2sens_2 = calibration_mt.sensor_to_segment_mt_cali3(data_static_mt, data_toe_touching_mt, data_static_sitting_mt)
+
+walking_period = calibration_mt.get_walking_4_calib(data_walking_mt_['shank_r']['Gyr_Z'].to_numpy())
+seg2sens = calibration_mt.sensor_to_segment_mt_cali1(data_static_mt_, data_walking_mt_, walking_period, data_toe_touching_mt_)
+seg2sens_2 = calibration_mt.sensor_to_segment_mt_cali3(data_static_mt_, data_toe_touching_mt_, data_static_sitting_mt_)
+
 
 
 
@@ -82,7 +102,9 @@ for selected_task in task_list:
     # # TODO: get joint angles during task
 
     static_orientation_mt = ik_mt.get_imu_orientation_mt(data_static_mt_, f_type = f_type, fs = constant_mt.MT_SAMPLING_RATE, dim = dim, params = f_params)
-    static_ja_mt          = ik_mt.get_all_ja_mt(seg2sens, static_orientation_mt)
+    static_ja_mt_cali1          = ik_mt.get_all_ja_mt(seg2sens, static_orientation_mt)
+    static_ja_mt_cali2          = ik_mt.get_all_ja_mt(seg2sens_2, static_orientation_mt)
+    static_ja_mt_without_cali   = ik_mt.get_all_ja_mt(no_seg2sens, static_orientation_mt)
 
 
     main_orientation_mt = ik_mt.get_imu_orientation_mt(data_main_, f_type = f_type, fs = constant_mt.MT_SAMPLING_RATE, dim = dim, params = f_params)
@@ -92,10 +114,12 @@ for selected_task in task_list:
     cali_2_ja_mt = ik_mt.get_all_ja_mt(seg2sens_2, main_orientation_mt)
 
     for jk in main_ja_mt.keys():
-        offset         = np.mean(static_ja_mt[jk])
-        main_ja_mt[jk] = main_ja_mt[jk] - offset
-        without_cali_ja_mt[jk] = without_cali_ja_mt[jk] - offset
-        cali_2_ja_mt[jk] = cali_2_ja_mt[jk] - offset
+        offset_cali1         = np.mean(static_ja_mt_cali1[jk])
+        offset_cali2         = np.mean(static_ja_mt_cali2[jk])
+        offset_without_cali  = np.mean(static_ja_mt_without_cali[jk])
+        main_ja_mt[jk] = main_ja_mt[jk] - offset_cali1
+        without_cali_ja_mt[jk] = without_cali_ja_mt[jk] - offset_without_cali
+        cali_2_ja_mt[jk] = cali_2_ja_mt[jk] - offset_cali2
 
 
     # # --- Mocap data --- #
@@ -197,8 +221,6 @@ for selected_task in task_list:
     ax[7, 0].plot(main_ja_mt['ankle_rotation_l'])
     ax[8, 0].plot(main_ja_mt['ankle_flexion_l'])
 
-
-
     ax[0, 1].plot(main_ja_mt['hip_adduction_r'])
     ax[1, 1].plot(main_ja_mt['hip_rotation_r'])
     ax[2, 1].plot(main_ja_mt['hip_flexion_r'])
@@ -269,6 +291,9 @@ for selected_task in task_list:
 
     import matplotlib.pyplot as plt
     fig, ax = plt.subplots(nrows = 3, ncols = 3, sharex = True)
+    #set figure size to 1920*1080
+    fig.set_size_inches(12, 7)
+
     #set up the 2d dictionary
     kinematic_angle = {
         'hip': {
@@ -320,7 +345,7 @@ for selected_task in task_list:
             # ax.set_ylim([-40, 60])
             # ax.set_ylim([-40, 40])
             ax[row, col].set_xlim([0, 100])
-            ax[row, col].set_xlabel('Gait cycle')
+            ax[row, col].set_xlabel('Hip adduction cycle')
             ax[row, col].set_xticklabels(['0%', '20%', '40%', '60%', '80%', '100%'])
             # ax[row, col].set_ylabel('Angle $(^o)$')
             ax[row, col].spines['left'].set_position(('outward', 8))
@@ -341,7 +366,16 @@ for selected_task in task_list:
     ax[0, 0].set_ylabel('Adduction Angle $(^o)$')
     ax[1, 0].set_ylabel('Rotation Angle $(^o)$')
     ax[2, 0].set_ylabel('Flexion Angle $(^o)$')
-    fig.suptitle('Joint Angles Comparison for Overground Walking')
+    ax[0, 1].set_ylabel('Adduction Angle $(^o)$')
+    ax[1, 1].set_ylabel('Rotation Angle $(^o)$')
+    ax[2, 1].set_ylabel('Flexion Angle $(^o)$')
+    ax[0, 2].set_ylabel('Adduction Angle $(^o)$')
+    ax[1, 2].set_ylabel('Rotation Angle $(^o)$')
+    ax[2, 2].set_ylabel('Flexion Angle $(^o)$')
+    fig.suptitle('Joint Angles Comparison for Hip Adduction')
+    #remove the white space on the left side
+    plt.subplots_adjust(left=0.1, right=0.8, top=0.9, bottom=0.1)
+    
     plt.show()
     # plt.savefig("eni_slide_legend.png", bbox_inches='tight')
     print('<-- Done')
