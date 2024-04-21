@@ -28,7 +28,7 @@ else:
 #              'overground_walking', 'overground_walking_toe_in', 'overground_walking_toe_out',
 #              'sts_jump', 'vertical_jump']
 
-task_list = ['overground_walking']
+task_list = ['overground_walking_toe_out']
 
 # Sensor configuration for analysis
 sensor_config  = {'pelvis': 'PELV', 
@@ -188,7 +188,9 @@ for selected_task in task_list:
     old_gaitphase = gait_phase_obj.gaitphase
     current_gaitphase = None
 
-    for i in range(gait_Segments['hc_index'][3], gait_Segments['hc_index'][3] + 120):
+    # for i in range(gait_Segments['hc_index'][15], gait_Segments['hc_index'][15] + 120):
+    fpa_list = []
+    for i in range(gait_Segments['hc_index'][3], gait_Segments['hc_index'][-1]):
         acc_x = data_main_['foot_r']['Acc_X'][i]
         acc_y = data_main_['foot_r']['Acc_Y'][i]
         acc_z = data_main_['foot_r']['Acc_Z'][i]
@@ -196,14 +198,16 @@ for selected_task in task_list:
         gyr_y = data_main_['foot_r']['Gyr_Y'][i]
         gyr_z = data_main_['foot_r']['Gyr_Z'][i]
 
+        calibrated_acc = np.dot(seg2sens_2['foot_r'], np.array([acc_x, acc_y, acc_z]))
+        calibrated_gyr = np.dot(seg2sens_2['foot_r'], np.array([gyr_x, gyr_y, gyr_z]))
         # calibrated_acc = np.dot(seg2sens['foot_r'], np.array([acc_x, acc_y, acc_z]))
         # calibrated_gyr = np.dot(seg2sens['foot_r'], np.array([gyr_x, gyr_y, gyr_z]))
 
-        # rotated_acc = np.dot(rot_our2fpa_2, calibrated_acc)
-        # rotated_gyr = np.dot(rot_our2fpa_2, calibrated_gyr)
+        rotated_acc = np.dot(rot_our2fpa_2, calibrated_acc)
+        rotated_gyr = np.dot(rot_our2fpa_2, calibrated_gyr)
 
-        rotated_acc = np.dot(rot_our2fpa, np.array([acc_x, acc_y, acc_z]))
-        rotated_gyr = np.dot(rot_our2fpa, np.array([gyr_x, gyr_y, gyr_z]))
+        # rotated_acc = np.dot(rot_our2fpa, np.array([acc_x, acc_y, acc_z]))
+        # rotated_gyr = np.dot(rot_our2fpa, np.array([gyr_x, gyr_y, gyr_z]))
 
         data = {'AccelX': rotated_acc[0], 'AccelY': rotated_acc[1], 'AccelZ': rotated_acc[2],
                 'GyroX': rotated_gyr[0], 'GyroY': rotated_gyr[1], 'GyroZ': rotated_gyr[2]}
@@ -222,10 +226,40 @@ for selected_task in task_list:
         # if current_gaitphase == MIDDLE_STANCE:
         fpa_obj.update_FPA(data, gait_phase_obj.gaitphase_old, gait_phase_obj.gaitphase)
         print(fpa_obj.FPA_this_step)
+        # if fpa_obj.FPA_this_step > 0:
+        #     fpa_list.append(fpa_obj.FPA_this_step)
+        fpa_list.append(fpa_obj.FPA_this_step)
+
+    #remove outliers
+    fpa_list = np.array(fpa_list)
+    upper_bound = np.mean(fpa_list) + 1*np.std(fpa_list)
+    lower_bound = np.mean(fpa_list) - 1*np.std(fpa_list)
+    fpa_list = fpa_list[(fpa_list < upper_bound) & (fpa_list > lower_bound)]
+
+    #flip the sign
+    # fpa_list = -1*fpa_list
+    
+    #save the fpa_list to a csv file
+    fpa_list = pd.DataFrame(fpa_list)
+    fpa_list.to_csv('fpa_list_cali2_toe_out.csv')
+
+
+
 
         # fpa_obj.update_FPA(data, gait_phase_obj.gaitphase_old, gait_phase_obj.gaitphase)
 
+    #plot the FPA
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots()
+    ax.plot(fpa_list)
+    ax.set_xlabel('Time')
+    ax.set_ylabel('FPA $(^o)$')
+    ax.set_title('Foot Progression Angle')
+    plt.show()
 
+
+    average_fpa = np.mean(fpa_list)
+    print('Average FPA: ', average_fpa)
 
 
     # import matplotlib.pyplot as plt
