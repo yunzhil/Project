@@ -433,3 +433,68 @@ def sensor_to_segment_mt_cali1_flip_axis(data_static, data_walking, walking_peri
         seg2sens[sensor_name] = np.array([fx, fy, fz])
 
     return seg2sens
+
+
+
+def sensor_to_segment_mt_cali4(data_static, data_toe_touching, data_leg_abduction):
+    
+    seg2sens = {}
+
+    for sensor_name in tqdm(data_static.keys()):
+        static_acc = 1*data_static[sensor_name][['Acc_X', 'Acc_Y', 'Acc_Z']].to_numpy()
+        vy         = np.mean(static_acc, axis = 0)
+        fy         = vy/norm(vy)
+
+        side = sensor_name[-1]
+        if sensor_name == 'chest':
+            fx = np.ones(3) 
+            fy = np.ones(3) 
+            fz = np.ones(3) # ignore as we do not use 
+            
+        elif sensor_name == 'pelvis':
+            static_toe_touching_acc = 1*data_toe_touching[sensor_name][['Acc_X', 'Acc_Y', 'Acc_Z']].to_numpy()
+
+            vy_1 = np.mean(static_toe_touching_acc, axis = 0)
+            fy_1 = vy_1/norm(vy_1)
+
+            vz = np.cross(fy, fy_1)
+            fz = vz/norm(vz)
+
+            vx = np.cross(fy, fz)
+            fx = vx/norm(vx)
+
+        elif (sensor_name == 'foot_r') or (sensor_name == 'foot_l'):
+            leg_abduction_gyr = 1*data_leg_abduction[sensor_name][['Gyr_X', 'Gyr_Y', 'Gyr_Z']].to_numpy()
+            pc1_ax      = get_pc1_ax_mt(leg_abduction_gyr)
+
+            if pc1_ax[1] < 0:
+                pc1_ax = (-1)*pc1_ax
+            
+            vz = np.cross(pc1_ax, fy)
+            fz = vz/norm(vz)
+
+            vx = np.cross(fy, fz)
+            fx = vx/norm(vx)
+        
+        else:
+            leg_abduction_gyr = 1*data_leg_abduction[sensor_name][['Gyr_X', 'Gyr_Y', 'Gyr_Z']].to_numpy()
+            pc1_ax      = get_pc1_ax_mt(leg_abduction_gyr)
+
+
+            if pc1_ax[-1] < 0:
+                pc1_ax = (-1)*pc1_ax
+            
+            if side == 'r':
+                # vz = np.cross(pc1_ax, fy)
+                vz = np.cross(fy, pc1_ax)
+            else:
+                vz = np.cross(fy, pc1_ax)
+            
+            fz = vz/norm(vz)
+
+            vx = np.cross(fy, fz)
+            fx = vx/norm(vx)
+
+        seg2sens[sensor_name] = np.array([fx, fy, fz])
+
+    return seg2sens

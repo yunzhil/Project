@@ -69,11 +69,16 @@ task_static_sitting = 'static_sitting'
 data_static_sitting_mt = preprocessing_mt.get_all_data_mt(subject, task_static_sitting, sensor_config, stage = 'calibration')
 data_static_sitting_mt_ = preprocessing_mt.match_data_mt(data_static_sitting_mt) # data after matching
 
+data_hip_adduction_mt = preprocessing_mt.get_all_data_mt(subject, 'leg_abduction_r', sensor_config, stage = 'calibration')
+data_hip_adduction_mt_ = preprocessing_mt.match_data_mt(data_hip_adduction_mt) # data after matching
+
 
 walking_period = calibration_mt.get_walking_4_calib(data_walking_mt_['shank_r']['Gyr_Z'].to_numpy())
 seg2sens = calibration_mt.sensor_to_segment_mt_cali1(data_static_mt_, data_walking_mt_, walking_period, data_toe_touching_mt_)
 seg2sens_2 = calibration_mt.sensor_to_segment_mt_cali3(data_static_mt_, data_toe_touching_mt_, data_static_sitting_mt_)
+seg2sens_3 = calibration_mt.sensor_to_segment_mt_cali4(data_static_mt_, data_toe_touching_mt_, data_hip_adduction_mt_)
 
+seg2sens_2 = seg2sens_3
 
 
 
@@ -93,9 +98,27 @@ for selected_task in task_list:
     # # Calibration
     no_seg2sens = {}
     for sensor_id in sensor_config.keys():
-        no_seg2sens[sensor_id] = np.array([[1.0, 0.0, 0.0],
-                                        [0.0, 1.0, 0.0],
-                                        [0.0, 0.0, 1.0]])
+        if sensor_id == 'thigh_r':
+            no_seg2sens[sensor_id] = np.array([[-1.0, 0.0, 0.0],
+                                                [0.0, 1.0, 0.0],
+                                                [0.0, 0.0, 1.0]])
+        elif sensor_id == 'shank_r':
+            no_seg2sens[sensor_id] = np.array([[-1.0, 0.0, 0.0],
+                                                [0.0, 1.0, 0.0],
+                                                [0.0, 0.0, 1.0]])
+        elif sensor_id == 'foot_r':
+            no_seg2sens[sensor_id] = np.array([[-1.0, 0.0, 0.0],
+                                                [0.0, 0.0, 1.0],
+                                                [0.0, 1.0, 0.0]])
+            
+        # elif sensor_id == 'pelvis':
+        #     no_seg2sens[sensor_id] = np.array([[0.0, 0.0, -1.0],
+        #                                         [1.0, 0.0, 0.0],
+        #                                         [0.0, -1.0, 0.0]])
+        else:   
+            no_seg2sens[sensor_id] = np.array([[1.0, 0.0, 0.0],
+                                            [0.0, 1.0, 0.0],
+                                            [0.0, 0.0, 1.0]])
 
     print(seg2sens)
 
@@ -324,6 +347,11 @@ for selected_task in task_list:
             s_mocap = []
             s_cali_2 = []
             for i in range(len(segment_id) - 1):
+                # if joint_id == 'hip' and angle_id == 'rotation':
+                #     without_cali_ja_mt[kinematic_angle] = -1*without_cali_ja_mt[kinematic_angle]
+                # elif joint_id == 'knee' and angle_id == 'adduction':
+                #     without_cali_ja_mt[kinematic_angle] = -1*without_cali_ja_mt[kinematic_angle]
+                #     main_ja_mocap[kinematic_angle] = -1*main_ja_mocap[kinematic_angle]
                 N = segment_id[i+1] - segment_id[i]
                 if N > 200:
                     continue

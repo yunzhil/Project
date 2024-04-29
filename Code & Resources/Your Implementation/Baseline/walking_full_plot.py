@@ -77,9 +77,27 @@ for selected_task in task_list:
     # # Calibration
     no_seg2sens = {}
     for sensor_id in sensor_config.keys():
-        no_seg2sens[sensor_id] = np.array([[1.0, 0.0, 0.0],
-                                        [0.0, 1.0, 0.0],
-                                        [0.0, 0.0, 1.0]])
+        if sensor_id == 'thigh_r':
+            no_seg2sens[sensor_id] = np.array([[-1.0, 0.0, 0.0],
+                                                [0.0, 1.0, 0.0],
+                                                [0.0, 0.0, 1.0]])
+        elif sensor_id == 'shank_r':
+            no_seg2sens[sensor_id] = np.array([[-1.0, 0.0, 0.0],
+                                                [0.0, 1.0, 0.0],
+                                                [0.0, 0.0, 1.0]])
+        elif sensor_id == 'foot_r':
+            no_seg2sens[sensor_id] = np.array([[-1.0, 0.0, 0.0],
+                                                [0.0, 0.0, 1.0],
+                                                [0.0, 1.0, 0.0]])
+            
+        elif sensor_id == 'pelvis':
+            no_seg2sens[sensor_id] = np.array([[0.0, 0.0, -1.0],
+                                                [1.0, 0.0, 0.0],
+                                                [0.0, -1.0, 0.0]])
+        else:   
+            no_seg2sens[sensor_id] = np.array([[1.0, 0.0, 0.0],
+                                            [0.0, 1.0, 0.0],
+                                            [0.0, 0.0, 1.0]])
 
     print(seg2sens)
 
